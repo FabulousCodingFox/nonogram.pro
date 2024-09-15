@@ -16,7 +16,7 @@ function generateNonogramIsGridValid(grid: Array<boolean>, dimx: number, dimy: n
   return true;
 }
 
-export function generateNonogram(dimx: number, dimy: number): NonogramData {
+export async function generateNonogram(dimx: number, dimy: number): Promise<NonogramData> {
   let grid = generateNonogramRandomGrid(dimx, dimy);
   while (!generateNonogramIsGridValid(grid, dimx, dimy)) {
     grid = generateNonogramRandomGrid(dimx, dimy);
@@ -71,6 +71,8 @@ export function generateNonogram(dimx: number, dimy: number): NonogramData {
 
     return nums;
   });
+
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 
   return {
     sizeX: dimx,
