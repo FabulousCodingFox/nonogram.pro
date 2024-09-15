@@ -5,6 +5,10 @@
   let data: NonogramData = null!;
 
   let boardPattern: Array<boolean | null> = $state(null!);
+  let boardRowHints: Array<Array<boolean>> = $state([]);
+  let boardColHints: Array<Array<boolean>> = $state([]);
+  let boardRowCompleted: Array<boolean> = $state([]);
+  let boardColCompleted: Array<boolean> = $state([]);
 
   try {
     const param_width = new URLSearchParams(window.location.search).get('w');
@@ -19,6 +23,10 @@
     if (width !== height) throw new Error('Width and height must be equal');
     data = generateNonogram(width, height);
     boardPattern = Array.from({ length: data.sizeX * data.sizeY }, () => null);
+    boardRowHints = data.rowHints.map((row) => row.map((hint) => false));
+    boardColHints = data.colHints.map((col) => col.map((hint) => false));
+    boardRowCompleted = data.rowHints.map(() => false);
+    boardColCompleted = data.colHints.map(() => false);
   } catch (e) {
     error = (e as Error).message;
   }
@@ -31,7 +39,87 @@
   let boardSetMouseOriginX: number = 0;
   let boardSetMouseOriginY: number = 0;
 
-  function onUpdateBoardCell(index: number) {}
+  function isRowCompletedUpdateRowHints(y: number): boolean {
+    let xHintIndex = 0;
+    let xCount = 0;
+    let changed = false;
+
+    function setFollowingRowsHintToFalse(index: number) {
+      for (let i = index; i < data.rowHints[y].length; i++) {
+        boardRowHints[y][i] = false;
+      }
+      boardRowHints = [...boardRowHints];
+      return false;
+    }
+
+    // Loop through the row and compare the cucrrent state with the row hints
+    for (let x = 0; x < data.sizeX; x++) {
+      if (boardPattern[y * data.sizeX + x]) {
+        xCount++;
+      } else if (xCount > 0) {
+        // Check if the current count matches the hint
+        if (data.rowHints[y][xHintIndex] !== xCount) return setFollowingRowsHintToFalse(xHintIndex);
+        boardRowHints[y][xHintIndex] = true;
+        changed = true;
+        xHintIndex++;
+        xCount = 0;
+      }
+    }
+
+    // Check for cases at the end
+    if (xCount > 0) {
+      if (data.rowHints[y][xHintIndex] !== xCount) return setFollowingRowsHintToFalse(xHintIndex);
+      boardRowHints[y][xHintIndex] = true;
+      changed = true;
+      xHintIndex++;
+    }
+
+    // Check if the hints are completed
+    if (xHintIndex !== data.rowHints[y].length) return setFollowingRowsHintToFalse(xHintIndex);
+
+    // If the hints are changed, update them
+    if (changed) boardRowHints = [...boardRowHints];
+
+    return true;
+  }
+
+  /**
+   * Checks if the board cell is correct
+   * 1. Fills completed rows
+   * 2. Highlights the row/column hints
+   * @param index
+   */
+  function onUpdateBoardCell(index: number, shapeTo: boolean | null) {
+    const x = index % data.sizeX;
+    const y = Math.floor(index / data.sizeX);
+    let isChanged = false;
+
+    // Check X-axis
+    // Check if axis is completed
+    if (isRowCompletedUpdateRowHints(y)) {
+      if (!boardRowCompleted[y]) {
+        boardRowCompleted[y] = true;
+        boardRowCompleted = [...boardRowCompleted];
+      }
+
+      // Only fill if a square was set
+      if (shapeTo === true) {
+        for (let x = 0; x < data.sizeX; x++) {
+          if (boardPattern[y * data.sizeX + x] === null) {
+            boardPattern[y * data.sizeX + x] = false;
+            isChanged = true;
+          }
+        }
+      }
+    } else {
+      if (boardRowCompleted[y]) {
+        boardRowCompleted[y] = false;
+        boardRowCompleted = [...boardRowCompleted];
+      }
+    }
+
+    if (isChanged) boardPattern = [...boardPattern];
+  }
 
   function onMouseDown(event: MouseEvent) {
     const el = event.target as HTMLElement;
@@ -52,7 +140,7 @@
     boardPattern[i] = boardSetShapeSet;
     boardPattern = [...boardPattern];
 
-    onUpdateBoardCell(i);
+    onUpdateBoardCell(i, boardSetShapeSet);
 
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -88,13 +176,8 @@
     if (correctedValue === boardSetShapeReplace) {
       boardPattern[correctedIndex] = boardSetShapeSet;
       boardPattern = [...boardPattern];
-      onUpdateBoardCell(correctedIndex);
+      onUpdateBoardCell(correctedIndex, boardSetShapeSet);
     }
-
-    //if(boardValue === boardSetShapeReplace && (boardSetMouseX === x || boardSetMouseY === y)){
-    //  boardPattern[i] = boardSetShapeSet;
-    //  boardPattern = [...boardPattern];
-    //}
   }
 </script>
 
@@ -117,7 +200,7 @@
       <div class="pointer-events-none col-span-1 col-start-1 row-span-1 row-start-2 grid h-full select-none gap-1 pr-1" style="grid-template-rows: repeat({data.sizeY}, minmax(0, 1fr)); grid-template-columns: repeat({data.rowHintslength}, minmax(0, 1fr));">
         {#each data.rowHints as row, rowIndex}
           {#each row as hint, hintIndex}
-            <div class="flex h-full items-center justify-center rounded border border-gray-300 bg-gray-200 px-2 text-sm font-bold text-gray-800" style="grid-row: {rowIndex + 1}/{rowIndex + 2}; grid-column: {data.rowHintslength - row.length + hintIndex + 1}/{data.rowHintslength - row.length + hintIndex + 2};">{hint}</div>
+            <div class="flex h-full items-center justify-center rounded border px-2 text-sm font-bold {boardRowCompleted[rowIndex] ? 'border-gray-200 bg-white text-gray-400' : boardRowHints[rowIndex][hintIndex] ? 'border-gray-300 bg-gray-200 text-gray-400' : 'border-gray-300 bg-gray-200 text-gray-800'}" style="grid-row: {rowIndex + 1}/{rowIndex + 2}; grid-column: {data.rowHintslength - row.length + hintIndex + 1}/{data.rowHintslength - row.length + hintIndex + 2};">{hint}</div>
           {/each}
         {/each}
       </div>
