@@ -19,7 +19,32 @@ import Layout from '../layouts/Layout.astro';
     >
       <h1 class="select-none text-center text-4xl font-bold text-gray-700 md:text-6xl lg:text-8xl">Nonogram<span class="text-primary-600">.</span>pro</h1>
 
-      <MenuSwitcher client:load />
+      <form class="mt-8 grid w-fit grid-cols-1 gap-4 text-center md:grid-cols-2 lg:grid-cols-3">
+        <a href="/play?w=5&h=5" class="block w-full rounded-full bg-blue-500 px-4 py-3 text-base text-white shadow-md hover:bg-primary-600 focus:border-primary-500 focus:ring-primary-500 md:px-6 md:py-4 md:text-lg lg:px-8 lg:py-5 lg:text-xl">
+          <span class="block font-semibold">Level 1</span>
+          <span class="block font-light md:text-sm lg:text-base">Very easy (5x5)</span>
+        </a>
+
+        <a href="/play?w=10&h=10" class="block w-full rounded-full bg-blue-500 px-4 py-3 text-base text-white shadow-md hover:bg-primary-600 focus:border-primary-500 focus:ring-primary-500 md:px-6 md:py-4 md:text-lg lg:px-8 lg:py-5 lg:text-xl">
+          <span class="block font-semibold">Level 2</span>
+          <span class="block font-light md:text-sm lg:text-base">Easy (10x10)</span>
+        </a>
+
+        <a href="/play?w=15&h=15" class="block w-full rounded-full bg-blue-500 px-4 py-3 text-base text-white shadow-md hover:bg-primary-600 focus:border-primary-500 focus:ring-primary-500 md:px-6 md:py-4 md:text-lg lg:px-8 lg:py-5 lg:text-xl">
+          <span class="block font-semibold">Level 3</span>
+          <span class="block font-light md:text-sm lg:text-base">Medium (15x15)</span>
+        </a>
+
+        <a href="/play?w=20&h=20" class="block w-full rounded-full bg-blue-500 px-4 py-3 text-base text-white shadow-md hover:bg-primary-600 focus:border-primary-500 focus:ring-primary-500 md:px-6 md:py-4 md:text-lg lg:px-8 lg:py-5 lg:text-xl">
+          <span class="block font-semibold">Level 4</span>
+          <span class="block font-light md:text-sm lg:text-base">Hard (20x20)</span>
+        </a>
+
+        <a href="/play?w=25&h=25" class="block w-full rounded-full bg-blue-500 px-4 py-3 text-base text-white shadow-md hover:bg-primary-600 focus:border-primary-500 focus:ring-primary-500 md:px-6 md:py-4 md:text-lg lg:px-8 lg:py-5 lg:text-xl">
+          <span class="block font-semibold">Level 5</span>
+          <span class="block font-light md:text-sm lg:text-base">Very Hard (25x25)</span>
+        </a>
+      </form>
     </div>
   </div>
 </Layout>
