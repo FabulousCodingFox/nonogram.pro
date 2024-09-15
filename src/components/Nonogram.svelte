@@ -40,8 +40,8 @@
   let boardSetMouseOriginY: number = 0;
 
   function isRowCompletedUpdateRowHints(y: number): boolean {
-    let xHintIndex = 0;
-    let xCount = 0;
+    let hintIndex = 0;
+    let count = 0;
     let changed = false;
 
     function setFollowingRowsHintToFalse(index: number) {
@@ -55,30 +55,73 @@
     // Loop through the row and compare the cucrrent state with the row hints
     for (let x = 0; x < data.sizeX; x++) {
       if (boardPattern[y * data.sizeX + x]) {
-        xCount++;
-      } else if (xCount > 0) {
+        count++;
+      } else if (count > 0) {
         // Check if the current count matches the hint
-        if (data.rowHints[y][xHintIndex] !== xCount) return setFollowingRowsHintToFalse(xHintIndex);
-        boardRowHints[y][xHintIndex] = true;
+        if (data.rowHints[y][hintIndex] !== count) return setFollowingRowsHintToFalse(hintIndex);
+        boardRowHints[y][hintIndex] = true;
         changed = true;
-        xHintIndex++;
-        xCount = 0;
+        hintIndex++;
+        count = 0;
       }
     }
 
     // Check for cases at the end
-    if (xCount > 0) {
-      if (data.rowHints[y][xHintIndex] !== xCount) return setFollowingRowsHintToFalse(xHintIndex);
-      boardRowHints[y][xHintIndex] = true;
+    if (count > 0) {
+      if (data.rowHints[y][hintIndex] !== count) return setFollowingRowsHintToFalse(hintIndex);
+      boardRowHints[y][hintIndex] = true;
       changed = true;
-      xHintIndex++;
+      hintIndex++;
     }
 
     // Check if the hints are completed
-    if (xHintIndex !== data.rowHints[y].length) return setFollowingRowsHintToFalse(xHintIndex);
+    if (hintIndex !== data.rowHints[y].length) return setFollowingRowsHintToFalse(hintIndex);
 
     // If the hints are changed, update them
     if (changed) boardRowHints = [...boardRowHints];
+
+    return true;
+  }
+
+  function isColCompletedUpdateColHints(x: number): boolean {
+    let hintIndex = 0;
+    let count = 0;
+    let changed = false;
+
+    function setFollowingColsHintToFalse(index: number) {
+      for (let i = index; i < data.colHints[x].length; i++) {
+        boardColHints[x][i] = false;
+      }
+      boardColHints = [...boardColHints];
+      return false;
+    }
+
+    // Loop through the col and compare the cucrrent state with the col hints
+    for (let y = 0; y < data.sizeY; y++) {
+      if (boardPattern[y * data.sizeX + x]) {
+        count++;
+      } else if (count > 0) {
+        if (data.colHints[x][hintIndex] !== count) return setFollowingColsHintToFalse(hintIndex);
+        boardColHints[x][hintIndex] = true;
+        changed = true;
+        hintIndex++;
+        count = 0;
+      }
+    }
+
+    // Check for cases at the end
+    if (count > 0) {
+      if (data.colHints[x][hintIndex] !== count) return setFollowingColsHintToFalse(hintIndex);
+      boardColHints[x][hintIndex] = true;
+      changed = true;
+      hintIndex++;
+    }
+
+    // Check if the hints are completed
+    if (hintIndex !== data.colHints[x].length) return setFollowingColsHintToFalse(hintIndex);
+
+    // If the hints are changed, update them
+    if (changed) boardColHints = [...boardColHints];
 
     return true;
   }
@@ -115,6 +158,30 @@
       if (boardRowCompleted[y]) {
         boardRowCompleted[y] = false;
         boardRowCompleted = [...boardRowCompleted];
+      }
+    }
+
+    // Check Y-axis
+    // Check if axis is completed
+    if (isColCompletedUpdateColHints(x)) {
+      if (!boardColCompleted[x]) {
+        boardColCompleted[x] = true;
+        boardColCompleted = [...boardColCompleted];
+      }
+
+      // Only fill if a square was set
+      if (shapeTo === true) {
+        for (let y = 0; y < data.sizeY; y++) {
+          if (boardPattern[y * data.sizeX + x] === null) {
+            boardPattern[y * data.sizeX + x] = false;
+            isChanged = true;
+          }
+        }
+      }
+    } else {
+      if (boardColCompleted[x]) {
+        boardColCompleted[x] = false;
+        boardColCompleted = [...boardColCompleted];
       }
     }
 
@@ -190,9 +257,9 @@
   <div class="flex h-full w-full items-center justify-center">
     <div class="grid" style="grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;">
       <div class="pointer-events-none col-span-1 col-start-2 row-span-1 row-start-1 grid h-full select-none gap-1 pb-1" style="grid-template-rows: repeat({data.colHintslength}, minmax(0, 1fr)); grid-template-columns: repeat({data.sizeX}, minmax(0, 1fr));">
-        {#each data.rowHints as row, rowIndex}
-          {#each row as hint, hintIndex}
-            <div class="flex h-full items-center justify-center rounded border border-gray-300 bg-gray-200 py-1 text-sm font-bold text-gray-800" style="grid-row: {data.colHintslength - row.length + hintIndex + 1}/{data.colHintslength - row.length + hintIndex + 2}; grid-column: {rowIndex + 1}/{rowIndex + 2};">{hint}</div>
+        {#each data.colHints as col, colIndex}
+          {#each col as hint, hintIndex}
+            <div class="flex h-full items-center justify-center rounded border text-sm font-bold {boardColCompleted[colIndex] ? 'border-gray-200 bg-white text-gray-400' : boardColHints[colIndex][hintIndex] ? 'border-gray-300 bg-gray-200 text-gray-400' : 'border-gray-300 bg-gray-200 text-gray-800'}" style="grid-row: {data.colHintslength - col.length + hintIndex + 1}/{data.colHintslength - col.length + hintIndex + 2}; grid-column: {colIndex + 1}/{colIndex + 2};">{hint}</div>
           {/each}
         {/each}
       </div>
