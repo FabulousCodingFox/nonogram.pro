@@ -1,5 +1,6 @@
 ---
 import { SEO } from 'astro-seo';
+import { ViewTransitions } from 'astro:transitions';
 
 interface Props {
   title: string;
@@ -10,14 +11,15 @@ const { title, description }: Props = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en" class="h-full w-full">
+<html lang="en" class="h-full w-full" transition:animate="none">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
     <SEO title={title} description={description} />
+    <ViewTransitions />
   </head>
-  <body class="h-full w-full">
+  <body class="h-full w-full" transition:animate="fade">
     <slot />
   </body>
 </html>
