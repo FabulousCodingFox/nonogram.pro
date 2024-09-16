@@ -31,7 +31,7 @@
   {#await data}
     <div class="flex h-full w-full flex-col items-center justify-center">
       <h1 class="select-none text-center text-4xl font-bold text-gray-700 md:text-6xl lg:text-8xl">Nonogram<span class="text-primary-600">.</span>pro</h1>
-      <p class="mt-4 text-center text-2xl text-gray-700">Loading...</p>
+      <p class="mt-4 text-center text-2xl text-gray-700"></p>
     </div>
   {:then finalData}
     {#if finalData && finalData.grid && finalData.rowHints && finalData.colHints}
