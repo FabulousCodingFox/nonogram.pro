@@ -226,8 +226,6 @@
   }
 </script>
 
-<!-- svelte-ignore missing-declaration -->
-<!-- svelte-ignore missing-declaration -->
 <div class="flex h-full w-full items-center justify-center">
   <div class="grid" style="grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;">
     <div class="pointer-events-none col-span-1 col-start-2 row-span-1 row-start-1 grid h-full select-none gap-1 pb-1" style="grid-template-rows: repeat({data.colHintslength}, minmax(0, 1fr)); grid-template-columns: repeat({data.sizeX}, minmax(0, 1fr));">
@@ -248,8 +246,8 @@
 
     <div class="col-span-1 col-start-2 row-span-1 row-start-2 h-[600px]" style="aspect-ratio: {data.sizeX}/{data.sizeY};">
       <div class="relative aspect-square h-full overflow-hidden">
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div on:mousedown={onMouseDown} on:mousemove={onMouseMove} on:contextmenu={(event) => event.preventDefault()} on:mouseleave={() => (boardSetMouseDown = false)} on:mouseup={() => (boardSetMouseDown = false)} class="grid h-full w-full" id="nonogram-grid-bg" style="grid-template-rows: repeat({data.sizeX}, minmax(0, 1fr)); grid-template-columns: repeat({data.sizeY}, minmax(0, 1fr));">
           {#each data.grid as _, tileIndex}
             {@const x = tileIndex % data.sizeX}

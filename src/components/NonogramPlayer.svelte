@@ -34,6 +34,13 @@
       <p class="mt-4 text-center text-2xl text-gray-700">Loading...</p>
     </div>
   {:then finalData}
-    <Nonogram data={finalData} />
+    {#if finalData && finalData.grid && finalData.rowHints && finalData.colHints}
+      <Nonogram data={finalData} />
+    {:else}
+      <div class="flex h-full w-full flex-col items-center justify-center">
+        <h1 class="select-none text-center text-4xl font-bold text-gray-700 md:text-6xl lg:text-8xl">Error</h1>
+        <p class="mt-4 text-center text-xl text-gray-700">Nonogram is corrupted</p>
+      </div>
+    {/if}
   {/await}
 {/if}
