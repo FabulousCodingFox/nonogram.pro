@@ -1,7 +1,7 @@
 import { getLineCombos } from './utils';
 
 export class NonogramSolver {
-  public MAX_SOLVE_TRY_ITERATIONS: number = 25;
+  public MAX_SOLVE_TRY_ITERATIONS: number = 100;
   private grid: Array<boolean>;
   private solvedGrid: Array<boolean | null>;
   public isSolved: boolean;
