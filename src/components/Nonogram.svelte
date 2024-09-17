@@ -234,11 +234,11 @@
 </script>
 
 <div class="flex h-full w-full items-center justify-center">
-  <div class="grid" style="grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;">
+  <div class="gridAppear grid" style="grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;">
     <div class="pointer-events-none col-span-1 col-start-2 row-span-1 row-start-1 grid h-full select-none gap-1 pb-1" style="grid-template-rows: repeat({data.colHintslength}, minmax(0, 1fr)); grid-template-columns: repeat({data.sizeX}, minmax(0, 1fr));">
       {#each data.colHints as col, colIndex}
         {#each col as hint, hintIndex}
-          <div class="flex h-full items-center justify-center rounded border text-sm font-bold transition-colors duration-150 {boardColCompleted[colIndex] ? 'border-gray-200 bg-white text-gray-400' : boardColHints[colIndex][hintIndex] ? 'border-gray-300 bg-gray-200 text-gray-400' : 'border-gray-300 bg-gray-200 text-gray-800'}" style="grid-row: {data.colHintslength - col.length + hintIndex + 1}/{data.colHintslength - col.length + hintIndex + 2}; grid-column: {colIndex + 1}/{colIndex + 2};">{hint}</div>
+          <div class="hintGroupFadeIn flex h-full items-center justify-center rounded border text-sm font-bold duration-150 motion-safe:transition-colors {boardColCompleted[colIndex] ? 'border-gray-200 bg-white text-gray-400' : boardColHints[colIndex][hintIndex] ? 'border-gray-300 bg-gray-200 text-gray-400' : 'border-gray-300 bg-gray-200 text-gray-800'}" style="grid-row: {data.colHintslength - col.length + hintIndex + 1}/{data.colHintslength - col.length + hintIndex + 2}; grid-column: {colIndex + 1}/{colIndex + 2}; --i: {colIndex};">{hint}</div>
         {/each}
       {/each}
     </div>
@@ -246,7 +246,7 @@
     <div class="pointer-events-none col-span-1 col-start-1 row-span-1 row-start-2 grid h-full select-none gap-1 pr-1" style="grid-template-rows: repeat({data.sizeY}, minmax(0, 1fr)); grid-template-columns: repeat({data.rowHintslength}, minmax(0, 1fr));">
       {#each data.rowHints as row, rowIndex}
         {#each row as hint, hintIndex}
-          <div class="flex h-full items-center justify-center rounded border px-2 text-sm font-bold transition-colors duration-150 {boardRowCompleted[rowIndex] ? 'border-gray-200 bg-white text-gray-400' : boardRowHints[rowIndex][hintIndex] ? 'border-gray-300 bg-gray-200 text-gray-400' : 'border-gray-300 bg-gray-200 text-gray-800'}" style="grid-row: {rowIndex + 1}/{rowIndex + 2}; grid-column: {data.rowHintslength - row.length + hintIndex + 1}/{data.rowHintslength - row.length + hintIndex + 2};">{hint}</div>
+          <div class="hintGroupFadeIn flex h-full items-center justify-center rounded border px-2 text-sm font-bold duration-150 motion-safe:transition-colors {boardRowCompleted[rowIndex] ? 'border-gray-200 bg-white text-gray-400' : boardRowHints[rowIndex][hintIndex] ? 'border-gray-300 bg-gray-200 text-gray-400' : 'border-gray-300 bg-gray-200 text-gray-800'}" style="grid-row: {rowIndex + 1}/{rowIndex + 2}; grid-column: {data.rowHintslength - row.length + hintIndex + 1}/{data.rowHintslength - row.length + hintIndex + 2}; --i: {rowIndex};">{hint}</div>
         {/each}
       {/each}
     </div>
@@ -279,7 +279,7 @@
 
 <style lang="scss">
   .nonogram-tile {
-    @apply pointer-events-none absolute left-0 top-0 h-[calc(100%+2px)] w-[calc(100%+2px)] -translate-x-[1px] -translate-y-[1px] select-none border border-gray-900 bg-gray-800 transition-transform duration-150;
+    @apply pointer-events-none absolute left-0 top-0 h-[calc(100%+2px)] w-[calc(100%+2px)] -translate-x-[1px] -translate-y-[1px] select-none border border-gray-900 bg-gray-800 duration-150 motion-safe:transition-transform;
     &.on {
       @apply z-10 scale-100;
     }
@@ -289,12 +289,61 @@
   }
 
   .nonogram-scale {
-    @apply pointer-events-none h-full w-full select-none text-gray-800 transition-transform duration-150;
+    @apply pointer-events-none h-full w-full select-none text-gray-800 duration-150 motion-safe:transition-transform;
     &.on {
       @apply z-10 scale-100;
     }
     &.off {
       @apply scale-0;
+    }
+  }
+
+  @keyframes fadein {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .hintGroupFadeIn {
+    @apply opacity-0;
+    animation-name: fadein;
+    animation-duration: 50ms;
+    animation-delay: calc(200ms + var(--i) * 25ms);
+    animation-fill-mode: forwards;
+    animation-timing-function: linear;
+  }
+
+  @keyframes gridAppear {
+    from {
+      opacity: 0;
+      transform: scale(0);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .gridAppear {
+    @apply opacity-0;
+    animation-name: gridAppear;
+    animation-duration: 250ms;
+    animation-fill-mode: forwards;
+    animation-timing-function: ease-in-out;
+  }
+
+  @media (prefers-reduced-motion) {
+    .hintGroupFadeIn {
+      animation: none;
+      @apply opacity-100;
+    }
+
+    .gridAppear {
+      animation: none;
+      @apply opacity-100;
     }
   }
 </style>
