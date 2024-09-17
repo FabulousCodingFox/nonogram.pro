@@ -4,6 +4,8 @@
 
   let error: string | null = null;
   let data: Promise<NonogramData> = null!;
+  let cw = 5;
+  let ch = 5;
 
   try {
     const param_width = new URLSearchParams(window.location.search).get('w');
@@ -16,9 +18,15 @@
     if (width > 30 || height > 30) throw new Error('Width and height must be at most 30');
     if (width % 5 !== 0 || height % 5 !== 0) throw new Error('Width and height must be divisible by 5');
     if (width !== height) throw new Error('Width and height must be equal');
+    cw = width;
+    ch = height;
     data = generateNonogram(width, height);
   } catch (e) {
     error = (e as Error).message;
+  }
+
+  function finishedNonogramCallback() {
+    data = generateNonogram(cw, ch);
   }
 </script>
 
@@ -35,7 +43,7 @@
     </div>
   {:then finalData}
     {#if finalData && finalData.grid && finalData.rowHints && finalData.colHints}
-      <Nonogram data={finalData} />
+      <Nonogram data={finalData} callback={finishedNonogramCallback} />
     {:else}
       <div class="flex h-full w-full flex-col items-center justify-center">
         <h1 class="select-none text-center text-4xl font-bold text-gray-700 md:text-6xl lg:text-8xl">Error</h1>

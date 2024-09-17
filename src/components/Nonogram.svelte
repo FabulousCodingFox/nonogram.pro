@@ -1,8 +1,7 @@
 <script lang="ts">
   import { type NonogramData } from '../lib/nonogram';
-  import { blur, crossfade, fade } from 'svelte/transition';
 
-  let { data }: { data: NonogramData } = $props();
+  let { data, callback }: { data: NonogramData; callback: () => void } = $props();
 
   let boardPattern: Array<boolean | null> = $state(Array.from({ length: data.sizeX * data.sizeY }, () => null));
   let boardRowHints: Array<Array<boolean>> = $state(data.rowHints.map((row) => row.map((hint) => false)));
@@ -17,6 +16,8 @@
   let boardSetMouseY: number | null = null;
   let boardSetMouseOriginX: number = 0;
   let boardSetMouseOriginY: number = 0;
+
+  let completed = $state(false);
 
   function isRowCompletedUpdateRowHints(y: number): boolean {
     let hintIndex = 0;
@@ -165,9 +166,20 @@
     }
 
     if (isChanged) boardPattern = [...boardPattern];
+
+    // Check if the board is completed through col and row completed hints
+    if (boardRowCompleted.every((row) => row) && boardColCompleted.every((col) => col)) {
+      completed = true;
+    }
   }
 
   function onMouseDown(event: MouseEvent) {
+    if (completed) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
+
     const el = event.target as HTMLElement;
     const index = el.getAttribute('data-index');
     if (index === null) return;
@@ -259,18 +271,22 @@
           {#each data.grid as _, tileIndex}
             {@const x = tileIndex % data.sizeX}
             {@const y = Math.floor(tileIndex / data.sizeX)}
-            <div class={`relative aspect-square overflow-visible bg-white`} data-index={tileIndex} style="border-top: {y % 5 === 0 ? '2px solid #e5e7eb' : '1px solid #e5e7eb'}; border-left: {x % 5 === 0 ? '2px solid #e5e7eb' : '1px solid #e5e7eb'}; border-bottom: {y === data.sizeY - 1 ? '2px solid #e5e7eb' : 'none'}; border-right: {x === data.sizeX - 1 ? '2px solid #e5e7eb' : ''};">
-              <div class="nonogram-tile {boardPattern[tileIndex] === true ? 'on' : 'off'}"></div>
-              <svg class="nonogram-scale {boardPattern[tileIndex] === false ? 'on' : 'off'}" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <div class="relative aspect-square overflow-visible bg-white transition-colors duration-500 {completed ? 'border-transparent' : 'border-gray-200'} {y % 5 === 0 ? 'border-t-2' : 'border-t-[1px]'} {x % 5 === 0 ? 'border-l-2' : 'border-l-[1px]'} {y === data.sizeY - 1 ? 'border-b-2' : ''} {x === data.sizeX - 1 ? 'border-r-[2px]' : ''}" data-index={tileIndex}>
+              <div class="nonogram-tile {boardPattern[tileIndex] === true ? 'on' : 'off'} {completed ? 'border-transparent' : 'border-gray-900'}"></div>
+              <svg class="nonogram-scale {boardPattern[tileIndex] === false && !completed ? 'on' : 'off'}" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6" />
               </svg>
             </div>
           {/each}
         </div>
         <div class="pointer-events-none absolute inset-0 grid select-none" style="grid-template-rows: repeat({data.sizeX / 5}, minmax(0, 1fr)); grid-template-columns: repeat({data.sizeY / 5}, minmax(0, 1fr));">
-          {#each { length: (data.sizeX * data.sizeY) / 25 } as _, squareIndex}
-            <div class="border-t-[2px] border-black border-l-[2px]{Math.floor(squareIndex / (data.sizeX / 5)) === data.sizeY / 5 - 1 ? ' border-b-[2px]' : ''}{squareIndex % (data.sizeX / 5) === data.sizeX / 5 - 1 ? ' border-r-[2px]' : ''}"></div>
-          {/each}
+          {#if completed}
+            <div class="border-2 border-black" style="grid-area: 1/1/{data.sizeX / 5 + 1}/{data.sizeY / 5 + 1}"></div>
+          {:else}
+            {#each { length: (data.sizeX * data.sizeY) / 25 } as _, squareIndex}
+              <div class="border-l-2 border-t-2 border-black {Math.floor(squareIndex / (data.sizeX / 5)) === data.sizeY / 5 - 1 ? 'border-b-2' : ''} {squareIndex % (data.sizeX / 5) === data.sizeX / 5 - 1 ? 'border-r-2' : ''}"></div>
+            {/each}
+          {/if}
         </div>
       </div>
     </div>
@@ -279,7 +295,10 @@
 
 <style lang="scss">
   .nonogram-tile {
-    @apply pointer-events-none absolute left-0 top-0 h-[calc(100%+2px)] w-[calc(100%+2px)] -translate-x-[1px] -translate-y-[1px] select-none border border-gray-900 bg-gray-800 duration-150 motion-safe:transition-transform;
+    @apply pointer-events-none absolute left-0 top-0 h-[calc(100%+2px)] w-[calc(100%+2px)] -translate-x-[1px] -translate-y-[1px] select-none border bg-gray-800;
+    transition:
+      transform 150ms,
+      border-color 150ms;
     &.on {
       @apply z-10 scale-100;
     }
