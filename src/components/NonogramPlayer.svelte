@@ -3,7 +3,7 @@
   import Nonogram from './Nonogram.svelte';
 
   let error: string | null = null;
-  let data: Promise<NonogramData> = null!;
+  let data: Promise<NonogramData> = $state(null!);
   let cw = 5;
   let ch = 5;
 
@@ -25,30 +25,32 @@
     error = (e as Error).message;
   }
 
-  function finishedNonogramCallback() {
+  async function finishedNonogramCallback() {
     data = generateNonogram(cw, ch);
   }
 </script>
 
-{#if error || !data}
+{#if error}
   <div class="flex h-full w-full flex-col items-center justify-center">
     <h1 class="select-none text-center text-4xl font-bold text-gray-700 md:text-6xl lg:text-8xl">Error</h1>
     <p class="mt-4 text-center text-xl text-gray-700">{error}</p>
   </div>
 {:else}
-  {#await data}
-    <div class="flex h-full w-full flex-col items-center justify-center">
-      <h1 class="select-none text-center text-4xl font-bold text-gray-700 md:text-6xl lg:text-8xl">Nonogram<span class="text-primary-600">.</span>pro</h1>
-      <p class="mt-4 text-center text-2xl text-gray-700"></p>
-    </div>
-  {:then finalData}
-    {#if finalData && finalData.grid && finalData.rowHints && finalData.colHints}
-      <Nonogram data={finalData} callback={finishedNonogramCallback} />
-    {:else}
+  {#key data}
+    {#await data}
       <div class="flex h-full w-full flex-col items-center justify-center">
-        <h1 class="select-none text-center text-4xl font-bold text-gray-700 md:text-6xl lg:text-8xl">Error</h1>
-        <p class="mt-4 text-center text-xl text-gray-700">Nonogram is corrupted</p>
+        <h1 class="select-none text-center text-4xl font-bold text-gray-700 md:text-6xl lg:text-8xl">Nonogram<span class="text-primary-600">.</span>pro</h1>
+        <p class="mt-4 text-center text-2xl text-gray-700"></p>
       </div>
-    {/if}
-  {/await}
+    {:then finalData}
+      {#if finalData && finalData.grid && finalData.rowHints && finalData.colHints}
+        <Nonogram data={finalData} callback={finishedNonogramCallback} />
+      {:else}
+        <div class="flex h-full w-full flex-col items-center justify-center">
+          <h1 class="select-none text-center text-4xl font-bold text-gray-700 md:text-6xl lg:text-8xl">Error</h1>
+          <p class="mt-4 text-center text-xl text-gray-700">Nonogram is corrupted</p>
+        </div>
+      {/if}
+    {/await}
+  {/key}
 {/if}

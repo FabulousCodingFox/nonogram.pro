@@ -170,6 +170,10 @@
     // Check if the board is completed through col and row completed hints
     if (boardRowCompleted.every((row) => row) && boardColCompleted.every((col) => col)) {
       completed = true;
+
+      setTimeout(() => {
+        callback();
+      }, 1000);
     }
   }
 
