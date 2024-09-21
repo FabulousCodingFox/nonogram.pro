@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { type NonogramData } from '../lib/nonogram';
 
   let { data, callback }: { data: NonogramData; callback: () => void } = $props();
@@ -18,6 +19,7 @@
   let boardSetMouseOriginY: number = 0;
   let boardSetLastTileX: number = 0;
   let boardSetLastTileY: number = 0;
+  let boardSetContextMenuDown = false;
 
   let completed = $state(false);
 
@@ -206,6 +208,8 @@
     if (isNaN(i)) return;
     const boardValue = boardPattern[i];
 
+    if (event.button === 2) boardSetContextMenuDown = true;
+
     boardSetMouseDown = true;
     boardSetShapeSet = boardValue === (event.button !== 2) ? null : event.button !== 2;
     boardSetShapeReplace = boardValue;
@@ -289,6 +293,16 @@
     event.preventDefault();
     event.stopImmediatePropagation();
   }
+
+  onMount(() => {
+    window.addEventListener('contextmenu', (event) => {
+      if (boardSetContextMenuDown) {
+        boardSetContextMenuDown = false;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    });
+  });
 </script>
 
 <div class="flex h-full w-full items-center justify-center">
