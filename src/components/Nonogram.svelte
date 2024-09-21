@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import { type NonogramData } from '../lib/nonogram';
 
   let { data, callback }: { data: NonogramData; callback: () => void } = $props();
@@ -294,14 +294,20 @@
     event.stopImmediatePropagation();
   }
 
+  function onContextmenu(event: Event) {
+    if (boardSetContextMenuDown) {
+      boardSetContextMenuDown = false;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  }
+
   onMount(() => {
-    window.addEventListener('contextmenu', (event) => {
-      if (boardSetContextMenuDown) {
-        boardSetContextMenuDown = false;
-        event.preventDefault();
-        event.stopImmediatePropagation();
-      }
-    });
+    window.addEventListener('contextmenu', onContextmenu);
+  });
+
+  onDestroy(() => {
+    window.removeEventListener('contextmenu', onContextmenu);
   });
 </script>
 
