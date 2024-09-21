@@ -297,28 +297,32 @@
   </div>
 </div>
 
-<style lang="scss">
+<style lang="css">
   .nonogram-tile {
     @apply pointer-events-none absolute left-0 top-0 h-[calc(100%+2px)] w-[calc(100%+2px)] -translate-x-[1px] -translate-y-[1px] select-none border bg-gray-800;
     transition:
       transform 150ms,
       border-color 150ms;
-    &.on {
-      @apply z-10 scale-100;
-    }
-    &.off {
-      @apply scale-0;
-    }
+  }
+
+  .nonogram-tile.on {
+    @apply z-10 scale-100;
+  }
+
+  .nonogram-tile.off {
+    @apply scale-0;
   }
 
   .nonogram-scale {
     @apply pointer-events-none h-full w-full select-none text-gray-800 duration-150 motion-safe:transition-transform;
-    &.on {
-      @apply z-10 scale-100;
-    }
-    &.off {
-      @apply scale-0;
-    }
+  }
+
+  .nonogram-scale.on {
+    @apply z-10 scale-100;
+  }
+
+  .nonogram-scale.off {
+    @apply scale-0;
   }
 
   @keyframes fadein {
