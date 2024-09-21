@@ -16,8 +16,23 @@
   let boardSetMouseY: number | null = null;
   let boardSetMouseOriginX: number = 0;
   let boardSetMouseOriginY: number = 0;
+  let boardSetLastTileX: number = 0;
+  let boardSetLastTileY: number = 0;
 
   let completed = $state(false);
+
+  /**
+   * Returns all values between a (inclusive) and b (inclusive)
+   * @param a Can be larger, smaller or equal to b
+   * @param b Can be larger, smaller or equal to a
+   */
+  function getAllValuesBetween(a: number, b: number): number[] {
+    const values = [];
+    for (let i = Math.min(a, b); i <= Math.max(a, b); i++) {
+      values.push(i);
+    }
+    return values;
+  }
 
   function isRowCompletedUpdateRowHints(y: number): boolean {
     let hintIndex = 0;
@@ -198,6 +213,8 @@
     boardSetMouseY = null;
     boardSetMouseOriginX = i % data.sizeX;
     boardSetMouseOriginY = Math.floor(i / data.sizeX);
+    boardSetLastTileX = boardSetMouseOriginX;
+    boardSetLastTileY = boardSetMouseOriginY;
 
     boardPattern[i] = boardSetShapeSet;
     boardPattern = [...boardPattern];
@@ -208,42 +225,67 @@
     event.stopImmediatePropagation();
   }
 
-  function onMouseMove(event: MouseEvent) {
-    if (!boardSetMouseDown) return;
-
-    const el = event.target as HTMLElement;
-    const index = el.getAttribute('data-index');
-    if (index === null) return;
-    const i = parseInt(index);
-    if (isNaN(i)) return;
-    const boardValue = boardPattern[i];
-
-    const x = i % data.sizeX;
-    const y = Math.floor(i / data.sizeX);
-
+  function mouseMoveHandler(x: number, y: number) {
     if (boardSetMouseX === null && boardSetMouseY === null && (boardSetMouseOriginX !== x || boardSetMouseOriginY !== y)) {
       if (boardSetMouseOriginY === y) {
-        boardSetMouseY = y;
-      }
-      if (boardSetMouseOriginX === x) {
-        boardSetMouseX = x;
+        boardSetMouseY = boardSetMouseOriginY;
+      } else {
+        boardSetMouseX = boardSetMouseOriginX;
       }
     }
 
     const correctedX = boardSetMouseX === null ? x : boardSetMouseX;
     const correctedY = boardSetMouseY === null ? y : boardSetMouseY;
     const correctedIndex = correctedY * data.sizeX + correctedX;
-    const correctedValue = boardPattern[correctedIndex];
 
-    if (correctedValue === boardSetShapeReplace) {
-      boardPattern[correctedIndex] = boardSetShapeSet;
-      boardPattern = [...boardPattern];
-      onUpdateBoardCell(correctedIndex, boardSetShapeSet);
-    }
+    let changed = false;
+    getAllValuesBetween(correctedX, boardSetMouseOriginX).forEach((loopTileX) => {
+      getAllValuesBetween(correctedY, boardSetMouseOriginY).forEach((loopTileY) => {
+        const loopTileIndex = loopTileY * data.sizeX + loopTileX;
+        const loopTileValue = boardPattern[loopTileIndex];
+        if (loopTileValue === boardSetShapeReplace) {
+          boardPattern[loopTileIndex] = boardSetShapeSet;
+          changed = true;
+          onUpdateBoardCell(loopTileIndex, boardSetShapeSet);
+          boardSetLastTileX = loopTileX;
+          boardSetLastTileY = loopTileY;
+        }
+      });
+    });
+    if (changed) boardPattern = [...boardPattern];
+  }
+
+  function onMouseMove(event: MouseEvent) {
+    if (!boardSetMouseDown) return;
+    const el = event.target as HTMLElement;
+    const index = el.getAttribute('data-index');
+    if (index === null) return;
+    const i = parseInt(index);
+    if (isNaN(i)) return;
+    const boardValue = boardPattern[i];
+    const x = i % data.sizeX;
+    const y = Math.floor(i / data.sizeX);
+    mouseMoveHandler(x, y);
   }
 
   function onMouseUp(event: MouseEvent) {
+    if (!boardSetMouseDown) return;
     boardSetMouseDown = false;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+
+  function onMouseLeave(event: MouseEvent) {
+    if (!boardSetMouseDown) return;
+    boardSetMouseDown = false;
+    if (boardSetMouseY && boardSetLastTileX !== boardSetMouseOriginX) {
+      let x = boardSetLastTileX - boardSetMouseOriginX > 0 ? data.sizeX - 1 : 0;
+      mouseMoveHandler(x, boardSetMouseY);
+    }
+    if (boardSetMouseX && boardSetLastTileY !== boardSetMouseOriginY) {
+      let y = boardSetLastTileY - boardSetMouseOriginY > 0 ? data.sizeY - 1 : 0;
+      mouseMoveHandler(boardSetMouseX, y);
+    }
     event.preventDefault();
     event.stopImmediatePropagation();
   }
@@ -271,7 +313,7 @@
       <div class="relative aspect-square h-full overflow-hidden">
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <div on:mousedown={onMouseDown} on:mousemove={onMouseMove} on:contextmenu={(event) => event.preventDefault()} on:mouseleave={onMouseUp} on:mouseup={onMouseUp} class="grid h-full w-full" id="nonogram-grid-bg" style="grid-template-rows: repeat({data.sizeX}, minmax(0, 1fr)); grid-template-columns: repeat({data.sizeY}, minmax(0, 1fr));">
+        <div onmousedown={onMouseDown} onmousemove={onMouseMove} oncontextmenu={(event) => event.preventDefault()} onmouseleave={onMouseLeave} onmouseup={onMouseUp} class="grid h-full w-full" id="nonogram-grid-bg" style="grid-template-rows: repeat({data.sizeX}, minmax(0, 1fr)); grid-template-columns: repeat({data.sizeY}, minmax(0, 1fr));">
           {#each data.grid as _, tileIndex}
             {@const x = tileIndex % data.sizeX}
             {@const y = Math.floor(tileIndex / data.sizeX)}
