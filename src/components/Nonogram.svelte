@@ -313,7 +313,7 @@
 
 <div class="flex h-full w-full items-center justify-center">
   <div class="gridAppear grid" style="grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;">
-    <div class="pointer-events-none col-span-1 col-start-2 row-span-1 row-start-1 grid h-full select-none gap-1 pb-1" style="grid-template-rows: repeat({data.colHintslength}, minmax(0, 1fr)); grid-template-columns: repeat({data.sizeX}, minmax(0, 1fr));">
+    <div class="pointer-events-none col-span-1 col-start-2 row-span-1 row-start-1 grid h-full gap-1 pb-1 select-none" style="grid-template-rows: repeat({data.colHintslength}, minmax(0, 1fr)); grid-template-columns: repeat({data.sizeX}, minmax(0, 1fr));">
       {#each data.colHints as col, colIndex}
         {#each col as hint, hintIndex}
           <div class="hintGroupFadeIn flex h-full items-center justify-center rounded border text-sm font-bold duration-150 motion-safe:transition-colors {boardColCompleted[colIndex] ? 'border-gray-200 bg-white text-gray-400' : boardColHints[colIndex][hintIndex] ? 'border-gray-300 bg-gray-200 text-gray-400' : 'border-gray-300 bg-gray-200 text-gray-800'}" style="grid-row: {data.colHintslength - col.length + hintIndex + 1}/{data.colHintslength - col.length + hintIndex + 2}; grid-column: {colIndex + 1}/{colIndex + 2}; --i: {colIndex};">{hint}</div>
@@ -321,7 +321,7 @@
       {/each}
     </div>
 
-    <div class="pointer-events-none col-span-1 col-start-1 row-span-1 row-start-2 grid h-full select-none gap-1 pr-1" style="grid-template-rows: repeat({data.sizeY}, minmax(0, 1fr)); grid-template-columns: repeat({data.rowHintslength}, minmax(0, 1fr));">
+    <div class="pointer-events-none col-span-1 col-start-1 row-span-1 row-start-2 grid h-full gap-1 pr-1 select-none" style="grid-template-rows: repeat({data.sizeY}, minmax(0, 1fr)); grid-template-columns: repeat({data.rowHintslength}, minmax(0, 1fr));">
       {#each data.rowHints as row, rowIndex}
         {#each row as hint, hintIndex}
           <div class="hintGroupFadeIn flex h-full items-center justify-center rounded border px-2 text-sm font-bold duration-150 motion-safe:transition-colors {boardRowCompleted[rowIndex] ? 'border-gray-200 bg-white text-gray-400' : boardRowHints[rowIndex][hintIndex] ? 'border-gray-300 bg-gray-200 text-gray-400' : 'border-gray-300 bg-gray-200 text-gray-800'}" style="grid-row: {rowIndex + 1}/{rowIndex + 2}; grid-column: {data.rowHintslength - row.length + hintIndex + 1}/{data.rowHintslength - row.length + hintIndex + 2}; --i: {rowIndex};">{hint}</div>
@@ -350,7 +350,7 @@
             <div class="border-2 border-black" style="grid-area: 1/1/{data.sizeX / 5 + 1}/{data.sizeY / 5 + 1}"></div>
           {:else}
             {#each { length: (data.sizeX * data.sizeY) / 25 } as _, squareIndex}
-              <div class="border-l-2 border-t-2 border-black {Math.floor(squareIndex / (data.sizeX / 5)) === data.sizeY / 5 - 1 ? 'border-b-2' : ''} {squareIndex % (data.sizeX / 5) === data.sizeX / 5 - 1 ? 'border-r-2' : ''}"></div>
+              <div class="border-t-2 border-l-2 border-black {Math.floor(squareIndex / (data.sizeX / 5)) === data.sizeY / 5 - 1 ? 'border-b-2' : ''} {squareIndex % (data.sizeX / 5) === data.sizeX / 5 - 1 ? 'border-r-2' : ''}"></div>
             {/each}
           {/if}
         </div>
@@ -360,29 +360,22 @@
 </div>
 
 <style lang="css">
+  @reference "../styles/tailwind.css";
+
   .nonogram-tile {
-    @apply pointer-events-none absolute left-0 top-0 h-[calc(100%+2px)] w-[calc(100%+2px)] -translate-x-[1px] -translate-y-[1px] select-none border bg-gray-800;
-    transition:
-      transform 150ms,
-      border-color 150ms;
-  }
-
-  .nonogram-tile.on {
-    @apply z-10 scale-100;
-  }
-
-  .nonogram-tile.off {
-    @apply scale-0;
+    @apply pointer-events-none absolute top-0 left-0 h-[calc(100%+2px)] w-[calc(100%+2px)] -translate-x-[1px] -translate-y-[1px] border bg-gray-800 duration-150 select-none motion-safe:transition-[scale,_border-color];
   }
 
   .nonogram-scale {
-    @apply pointer-events-none h-full w-full select-none text-gray-800 duration-150 motion-safe:transition-transform;
+    @apply pointer-events-none h-full w-full text-gray-800 duration-150 select-none motion-safe:transition-transform;
   }
 
+  .nonogram-tile.on,
   .nonogram-scale.on {
     @apply z-10 scale-100;
   }
 
+  .nonogram-tile.off,
   .nonogram-scale.off {
     @apply scale-0;
   }

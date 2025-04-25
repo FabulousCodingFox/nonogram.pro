@@ -1,6 +1,8 @@
 ---
 import { SEO } from 'astro-seo';
-import { ViewTransitions } from 'astro:transitions';
+import { ClientRouter } from 'astro:transitions';
+import { UMAMI_WEBSITE_ID } from 'astro:env/client';
+import '../styles/tailwind.css';
 
 interface Props {
   title: string;
@@ -13,11 +15,20 @@ const { title, description }: Props = Astro.props;
 <!doctype html>
 <html lang="en" class="h-full w-full" transition:animate="none">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="generator" content={Astro.generator} />
-    <SEO title={title} description={description} />
-    <ViewTransitions />
+    <SEO
+      title={title}
+      description={description}
+      canonical={Astro.site?.toString().slice(0, -1)}
+      extend={{
+        meta: [
+          { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
+          { name: 'generator', content: Astro.generator }
+        ]
+      }}
+      charset="UTF-8"
+    />
+    <script type="text/partytown" src="https://metrics.nonogram.pro/script.js" data-website-id={UMAMI_WEBSITE_ID} is:inline></script>
+    <ClientRouter fallback="animate" />
   </head>
   <body class="h-full w-full" transition:animate="fade">
     <slot />
