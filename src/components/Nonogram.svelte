@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { onDestroy, onMount } from 'svelte';
   import { type NonogramData } from '../lib/nonogram';
 
   let { data, callback }: { data: NonogramData; callback: () => void } = $props();
 
-  let boardPattern: Array<boolean | null> = $state(Array.from({ length: data.sizeX * data.sizeY }, () => null));
+  let boardPattern: Array<boolean | null> = $state(data.startGrid);
   let boardRowHints: Array<Array<boolean>> = $state(data.rowHints.map((row) => row.map((hint) => false)));
   let boardColHints: Array<Array<boolean>> = $state(data.colHints.map((col) => col.map((hint) => false)));
   let boardRowCompleted: Array<boolean> = $state(data.rowHints.map(() => false));
@@ -301,15 +300,9 @@
       event.stopImmediatePropagation();
     }
   }
-
-  onMount(() => {
-    window.addEventListener('contextmenu', onContextmenu);
-  });
-
-  onDestroy(() => {
-    window.removeEventListener('contextmenu', onContextmenu);
-  });
 </script>
+
+<svelte:window oncontextmenu={onContextmenu} />
 
 <div class="flex h-full w-full items-center justify-center">
   <div class="gridAppear grid" style="grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;">

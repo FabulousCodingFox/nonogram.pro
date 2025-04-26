@@ -6,7 +6,7 @@ function generateNonogramRandomGrid(dimx: number, dimy: number): Array<boolean> 
   return Array.from({ length: dimx * dimy }, () => Math.random() < density);
 }
 
-export async function generateNonogram(dimx: number, dimy: number): Promise<NonogramData> {
+export async function generateNonogram(dimx: number, dimy: number, help: boolean): Promise<NonogramData> {
   let grid: boolean[] = [];
   let colHints: number[][] = [];
   let rowHints: number[][] = [];
@@ -75,6 +75,18 @@ export async function generateNonogram(dimx: number, dimy: number): Promise<Nono
     });
   }
 
+  let startGrid: Array<boolean | null> = Array.from({ length: dimx * dimy }, () => null);
+
+  if (help) {
+    // Fill some empty cells (40%-50%) with false to help the user
+    let percentage = Math.random() * 0.1 + 0.4; // Random percentage between 40% and 50%
+    for (let i = 0; i < grid.length; i++) {
+      if (grid[i] === false) {
+        if (Math.random() < percentage) startGrid[i] = false;
+      }
+    }
+  }
+
   // Return the generated nonogram
   return {
     sizeX: dimx,
@@ -83,6 +95,7 @@ export async function generateNonogram(dimx: number, dimy: number): Promise<Nono
     rowHints: rowHints,
     colHints: colHints,
     rowHintslength: rowHintslength,
-    colHintslength: colHintslength
+    colHintslength: colHintslength,
+    startGrid: startGrid
   };
 }

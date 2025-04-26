@@ -3,21 +3,14 @@ import { SEO } from 'astro-seo';
 import { ClientRouter } from 'astro:transitions';
 import { UMAMI_WEBSITE_ID } from 'astro:env/client';
 import '../styles/tailwind.css';
-
-interface Props {
-  title: string;
-  description: string;
-}
-
-const { title, description }: Props = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en" class="h-full w-full" transition:animate="none">
   <head>
     <SEO
-      title={title}
-      description={description}
+      title="Nonogram.pro"
+      description="Nonogram.pro is an interactive and user-friendly platform dedicated to the art of nonograms, also known as Picross, Griddlers, or Hanjie puzzles"
       canonical={Astro.site?.toString().slice(0, -1)}
       extend={{
         meta: [

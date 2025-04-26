@@ -1,2 +1,15 @@
 @import 'tailwindcss';
-@config "../../tailwind.config.mjs";
+
+@theme {
+  --color-primary-50: #f3f7fc;
+  --color-primary-100: #e7eff7;
+  --color-primary-200: #c9dbee;
+  --color-primary-300: #99bee0;
+  --color-primary-400: #629dce;
+  --color-primary-500: #3e80b9;
+  --color-primary-600: #2c6398;
+  --color-primary-700: #26527e;
+  --color-primary-800: #234669;
+  --color-primary-900: #213c59;
+  --color-primary-950: #16263b;
+}

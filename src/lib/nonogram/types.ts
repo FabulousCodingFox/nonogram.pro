@@ -6,4 +6,5 @@ export interface NonogramData {
   colHints: number[][];
   rowHintslength: number;
   colHintslength: number;
+  startGrid: Array<boolean | null>;
 }
