@@ -13,7 +13,7 @@ export default defineConfig({
   env: {
     validateSecrets: true,
     schema: {
-      UMAMI_WEBSITE_ID: envField.string({ context: 'client', access: 'public' })
+      UMAMI_WEBSITE_ID: envField.string({ context: 'client', access: 'public', default: '' })
     }
   },
   vite: {
