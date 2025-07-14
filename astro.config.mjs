@@ -5,7 +5,6 @@ import tailwindcss from '@tailwindcss/vite';
 import svelte from '@astrojs/svelte';
 import sitemap from '@astrojs/sitemap';
 import robotsTxt from 'astro-robots-txt';
-import partytown from '@astrojs/partytown';
 
 // https://astro.build/config
 export default defineConfig({
@@ -22,7 +21,6 @@ export default defineConfig({
   output: 'static',
   integrations: [
     svelte(),
-    partytown(),
     robotsTxt({
       sitemap: 'https://nonogram.pro/sitemap-index.xml',
       policy: [
